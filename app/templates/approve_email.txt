@@ -1,0 +1,10 @@
+Hello {{approver_name or "Approver"}},
+
+User {{requester_email}} requested role {{requested_role}}.
+
+Approve: {{approve_url}}
+Reject:  {{reject_url}}
+
+Expires: {{expiry_date}} UTC
+
+If unexpected, contact Security.

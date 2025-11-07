@@ -1,0 +1,18 @@
+<!doctype html>
+<html>
+  <body>
+    <p>Hello {{approver_name or "Approver"}},</p>
+
+    <p>User <strong>{{requester_email}}</strong> has requested role <strong>{{requested_role}}</strong>.</p>
+
+    <p>
+      <a href="{{approve_url}}">Approve</a> |
+      <a href="{{reject_url}}">Reject</a>
+    </p>
+
+    <p>This link expires on {{expiry_date}} UTC.</p>
+
+    <hr/>
+    <p>If you didn't expect this, contact Security.</p>
+  </body>
+</html>
