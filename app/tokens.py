@@ -18,7 +18,6 @@ def create_token_jti(request_id: str, action: str, expiry_seconds: int=None):
         "iss": "iam-email-service"
     }
     token = jwt.encode(payload, settings.TOKEN_SECRET, algorithm="HS256")
-    # persist jti
     db = SessionLocal()
     try:
         db_token = ApprovalToken(jti=jti, request_id=request_id, action=action, created_at=now, expires_at=exp)
@@ -31,7 +30,10 @@ def create_token_jti(request_id: str, action: str, expiry_seconds: int=None):
         db.close()
     return token
 
-def validate_and_mark_token(token_str: str):
+def validate_token_no_mark(token_str: str):
+    """
+    Validate token but DO NOT mark used. Returns (payload, error)
+    """
     try:
         payload = jwt.decode(token_str, settings.TOKEN_SECRET, algorithms=["HS256"], options={"require": ["exp","iat","jti"]})
     except jwt.ExpiredSignatureError:
@@ -48,12 +50,24 @@ def validate_and_mark_token(token_str: str):
             return None, "already used"
         if db_token.expires_at < datetime.datetime.utcnow():
             return None, "expired (DB)"
-        # mark used atomically
-        db_token.used_at = datetime.datetime.utcnow()
-        db.commit()
         return payload, None
-    except Exception as e:
-        db.rollback()
-        return None, str(e)
     finally:
         db.close()
+
+def mark_token_used(jti: str):
+    db = SessionLocal()
+    try:
+        db_token = db.query(ApprovalToken).filter_by(jti=jti).first()
+        if not db_token:
+            return False
+        if db_token.used_at is not None:
+            return False
+        db_token.used_at = datetime.datetime.utcnow()
+        db.commit()
+        return True
+    except Exception:
+        db.rollback()
+        raise
+    finally:
+        db.close()
+

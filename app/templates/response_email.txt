@@ -1,0 +1,8 @@
+Hello,
+
+Your access request for role: {{requested_role}} has been {{status}}.
+
+If you have questions, please contact IT support.
+
+Regards,
+IAM Automation

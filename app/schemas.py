@@ -1,5 +1,5 @@
-from pydantic import BaseModel, Field, EmailStr
-from typing import Optional, List, Dict
+from pydantic import BaseModel, EmailStr
+from typing import Optional, Dict
 
 class CreateRequest(BaseModel):
     keycloak_user_id: str
@@ -11,6 +11,3 @@ class CreateResponse(BaseModel):
     request_id: str
     status: str
 
-class CallbackResponse(BaseModel):
-    request_id: str
-    status: str

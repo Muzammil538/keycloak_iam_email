@@ -1,10 +1,11 @@
-Hello {{approver_name or "Approver"}},
+Access approval request
 
-User {{requester_email}} requested role {{requested_role}}.
+User: {{requester_email}}
+Requested role: {{requested_role}}
 
 Approve: {{approve_url}}
 Reject:  {{reject_url}}
 
 Expires: {{expiry_date}} UTC
 
-If unexpected, contact Security.
+If you did not expect this, contact IT Security.

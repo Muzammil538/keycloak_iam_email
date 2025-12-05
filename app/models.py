@@ -1,12 +1,8 @@
-import datetime
-import enum
-import uuid
-from sqlalchemy import Column, String, DateTime, Integer, Text, Boolean, Enum, ForeignKey
-from sqlalchemy.dialects.sqlite import JSON as SQLITE_JSON
+import datetime, uuid, enum
+from sqlalchemy import Column, String, DateTime, Integer, Text, Enum, ForeignKey
 from sqlalchemy.orm import relationship
 from .db import Base
 
-# small enum for status
 class RequestStatus(str, enum.Enum):
     pending = "pending"
     approved = "approved"
@@ -20,7 +16,7 @@ class AccessRequest(Base):
     keycloak_user_id = Column(String(36), nullable=False)
     requester_email = Column(String(256))
     requested_role = Column(String(256))
-    meta = Column(Text, nullable=True)
+    metadata = Column(Text, nullable=True)
     status = Column(Enum(RequestStatus), default=RequestStatus.pending)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
@@ -31,7 +27,7 @@ class ApprovalToken(Base):
     __tablename__ = "approval_tokens"
     jti = Column(String(64), primary_key=True)
     request_id = Column(String(36), ForeignKey("access_requests.id"), nullable=False)
-    action = Column(String(16), nullable=False)  # approve / reject
+    action = Column(String(16), nullable=False)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
     expires_at = Column(DateTime, nullable=False)
     used_at = Column(DateTime, nullable=True)
@@ -48,3 +44,4 @@ class AuditLog(Base):
     user_agent = Column(String(512), nullable=True)
     meta = Column(Text, nullable=True)
     timestamp = Column(DateTime, default=datetime.datetime.utcnow)
+

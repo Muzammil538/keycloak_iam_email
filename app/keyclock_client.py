@@ -12,8 +12,8 @@ class KeycloakClient:
                                       client_id=settings.KEYCLOAK_CLIENT_ID,
                                       client_secret_key=settings.KEYCLOAK_CLIENT_SECRET,
                                       verify=True)
+
     def get_user_id_by_username_or_email(self, username_or_email):
-        # Returns first matched user id
         users = self.kc_admin.get_users({"username": username_or_email}) or []
         if not users:
             users = self.kc_admin.get_users({"email": username_or_email}) or []
@@ -27,3 +27,4 @@ class KeycloakClient:
             raise Exception("role not found")
         self.kc_admin.assign_realm_role(user_id=user_id, roles=[role])
         logger.info("Assigned role %s to user %s", role_name, user_id)
+

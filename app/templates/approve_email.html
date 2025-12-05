@@ -1,18 +1,48 @@
 <!doctype html>
 <html>
-  <body>
-    <p>Hello {{approver_name or "Approver"}},</p>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <!-- Tailwind CDN (play CDN for simplicity) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-gray-50 font-sans text-gray-800">
+    <table class="max-w-xl mx-auto my-8 bg-white rounded-lg shadow-md overflow-hidden">
+      <tr>
+        <td class="p-6">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-full bg-indigo-500 text-white flex items-center justify-center font-bold text-lg">IAM</div>
+            <div>
+              <h1 class="text-xl font-semibold">Access approval request</h1>
+              <p class="text-sm text-gray-500">from your organisation's IAM system</p>
+            </div>
+          </div>
 
-    <p>User <strong>{{requester_email}}</strong> has requested role <strong>{{requested_role}}</strong>.</p>
+          <div class="mt-6 text-gray-700">
+            <p><span class="font-medium">{{requester_email}}</span> has requested role <span class="font-medium text-indigo-600">{{requested_role}}</span>.</p>
 
-    <p>
-      <a href="{{approve_url}}">Approve</a> |
-      <a href="{{reject_url}}">Reject</a>
-    </p>
+            <div class="mt-4">
+              <p class="text-sm text-gray-600">Please review and choose an action:</p>
+              <div class="mt-4 flex gap-3">
+                <a href="{{approve_url}}" class="inline-block px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">✅ Approve</a>
+                <a href="{{reject_url}}" class="inline-block px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">❌ Reject</a>
+              </div>
+            </div>
 
-    <p>This link expires on {{expiry_date}} UTC.</p>
+            <div class="mt-6 text-sm text-gray-500">
+              <p>Link expires on <strong>{{expiry_date}}</strong> (UTC).</p>
+            </div>
 
-    <hr/>
-    <p>If you didn't expect this, contact Security.</p>
+            <hr class="my-6 border-gray-200"/>
+
+            <p class="text-sm text-gray-600">If you do not expect this request or the links look suspicious, please contact your IT security team.</p>
+          </div>
+
+          <div class="mt-6 text-xs text-gray-400">
+            <p>IAM Automation • Automated email — please do not reply directly to this address.</p>
+          </div>
+        </td>
+      </tr>
+    </table>
   </body>
 </html>
