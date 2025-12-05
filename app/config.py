@@ -4,9 +4,9 @@ import os
 load_dotenv()
 
 class Settings:
-    APP_HOST = os.getenv("APP_HOST", "0.0.0.0")
+    APP_HOST = os.getenv("APP_HOST", "127.0.0.1")
     APP_PORT = int(os.getenv("APP_PORT", 8080))
-    APP_BASE = os.getenv("APP_BASE", "http://localhost:8080")
+    APP_BASE = os.getenv("APP_BASE", "http://127.0.0.1:8080")
 
     DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./data/iam.db")
 
