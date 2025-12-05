@@ -28,7 +28,7 @@ def create_request(payload: CreateRequest):
             keycloak_user_id=payload.keycloak_user_id,
             requester_email=payload.requester_email,
             requested_role=payload.requested_role,
-            metadata=str(payload.metadata),
+            meta=str(payload.metadata),
             status=RequestStatus.pending
         )
         db.add(req)
