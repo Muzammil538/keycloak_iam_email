@@ -1,0 +1,96 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <title>Admin - Mailbox</title>
+</head>
+<body class="bg-gray-50 text-gray-800">
+  <div class="max-w-6xl mx-auto py-8">
+    <div class="flex items-center justify-between">
+      <h1 class="text-2xl font-semibold">Inbox — Access Requests</h1>
+      <div>
+        <!-- Add auth/login link here in prod -->
+        <a href="/health" class="text-sm text-gray-500">Health</a>
+      </div>
+    </div>
+
+    <div class="mt-6 bg-white shadow rounded-lg overflow-hidden">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Request ID</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Requester</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
+            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="requests-tbody" class="bg-white divide-y divide-gray-200">
+          {% for r in requests %}
+          <tr id="req-row-{{ r.id }}">
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"><code class="text-xs text-gray-600">{{ r.id }}</code></td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm">{{ r.requester_email or '—' }}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm">{{ r.requested_role }}</td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              {% if r.status == 'pending' %}
+                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">Pending</span>
+              {% elif r.status == 'approved' %}
+                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Approved</span>
+              {% else %}
+                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Rejected</span>
+              {% endif %}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ r.created_at }}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+              <a href="/admin/requests/{{ r.id }}" class="text-indigo-600 hover:text-indigo-900 mr-3">View</a>
+              {% if r.status == 'pending' %}
+                <button onclick="takeAction('{{ r.id }}','approve')" class="inline-flex items-center px-3 py-1.5 bg-green-600 text-white rounded text-sm hover:bg-green-700">Approve</button>
+                <button onclick="takeAction('{{ r.id }}','reject')" class="inline-flex items-center px-3 py-1.5 bg-red-600 text-white rounded text-sm hover:bg-red-700 ml-2">Reject</button>
+              {% endif %}
+            </td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="6" class="px-6 py-8 text-center text-gray-500">No requests yet.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+<script>
+async function takeAction(requestId, action) {
+  if (!confirm("Are you sure you want to " + action + " this request?")) return;
+  try {
+    const resp = await fetch(`/admin/requests/${requestId}/action`, {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({ action })
+    });
+    if (!resp.ok) {
+      const txt = await resp.text();
+      alert("Action failed: " + txt);
+      return;
+    }
+    const data = await resp.json();
+    // update row status visually
+    const row = document.getElementById('req-row-' + requestId);
+    if (row) {
+      // Replace status cell with new label & remove buttons
+      row.querySelectorAll('td')[3].innerHTML = action === 'approve' ? '<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Approved</span>' : '<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Rejected</span>';
+      row.querySelectorAll('td')[5].innerHTML = '<span class="text-sm text-gray-600">Actioned</span>';
+    }
+    alert("Request " + action + "ed successfully.");
+  } catch (e) {
+    console.error(e);
+    alert("Unexpected error: " + e.message);
+  }
+}
+</script>
+
+</body>
+</html>

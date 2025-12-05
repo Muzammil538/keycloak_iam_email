@@ -1,5 +1,6 @@
 
 
+
 ---
 
 # **Keycloak Email Approval System (with MailerSend & Tailwind Email Templates)**

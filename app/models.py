@@ -45,3 +45,15 @@ class AuditLog(Base):
     meta = Column(Text, nullable=True)
     timestamp = Column(DateTime, default=datetime.datetime.utcnow)
 
+class InboundEmail(Base):
+    __tablename__ = "inbound_emails"
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    message_id = Column(String(256), nullable=True)        # original message-id
+    from_email = Column(String(256), nullable=True)
+    from_name = Column(String(256), nullable=True)
+    to_email = Column(String(1024), nullable=True)         # comma separated recipients
+    subject = Column(String(512), nullable=True)
+    text = Column(Text, nullable=True)
+    html = Column(Text, nullable=True)
+    received_at = Column(DateTime, default=datetime.datetime.utcnow)
+    raw_payload = Column(Text, nullable=True) 

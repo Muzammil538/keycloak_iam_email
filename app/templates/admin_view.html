@@ -1,0 +1,78 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width,initial-scale=1" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <title>Admin — View Request</title>
+</head>
+<body class="bg-gray-50 text-gray-800">
+  <div class="max-w-5xl mx-auto py-8">
+    <div class="flex items-center justify-between">
+      <a href="/admin/requests" class="text-indigo-600 hover:underline">&larr; Back to inbox</a>
+      <h1 class="text-xl font-semibold">Request Details</h1>
+      <div></div>
+    </div>
+
+    <div class="mt-6 grid grid-cols-3 gap-6">
+      <div class="col-span-2 bg-white p-6 rounded shadow">
+        <h2 class="text-lg font-medium">Email preview</h2>
+        <div class="mt-4 border rounded overflow-auto p-4" style="max-height:60vh;">
+          <!-- Render the HTML email as-is -->
+          <iframe id="emailFrame" sandbox="allow-same-origin" style="width:100%;height:100%;border:0;"></iframe>
+        </div>
+      </div>
+
+      <div class="col-span-1 bg-white p-6 rounded shadow">
+        <h2 class="text-lg font-medium">Details</h2>
+        <dl class="mt-4 text-sm text-gray-700">
+          <dt class="font-medium">Request ID</dt><dd class="mb-3"><code class="text-xs text-gray-600">{{ req.id }}</code></dd>
+          <dt class="font-medium">Requester</dt><dd class="mb-3">{{ req.requester_email or '—' }}</dd>
+          <dt class="font-medium">Requested Role</dt><dd class="mb-3">{{ req.requested_role }}</dd>
+          <dt class="font-medium">Status</dt><dd class="mb-3">{{ req.status }}</dd>
+          <dt class="font-medium">Created at</dt><dd class="mb-3">{{ req.created_at }}</dd>
+        </dl>
+
+        <div class="mt-6">
+          {% if req.status == 'pending' %}
+            <button id="approveBtn" onclick="perform('approve')" class="w-full inline-flex justify-center items-center px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">✅ Approve</button>
+            <button id="rejectBtn" onclick="perform('reject')" class="w-full mt-3 inline-flex justify-center items-center px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">❌ Reject</button>
+          {% else %}
+            <div class="text-sm text-gray-600">This request is already <strong>{{ req.status }}</strong>.</div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+const htmlContent = `{{ email_html | replace("\n", "\\n") | replace("`","\\`") }}`;
+const frame = document.getElementById('emailFrame');
+frame.contentWindow.document.open();
+frame.contentWindow.document.write(htmlContent);
+frame.contentWindow.document.close();
+
+async function perform(action) {
+  if (!confirm("Confirm " + action + "?")) return;
+  try {
+    const resp = await fetch(`/admin/requests/{{ req.id }}/action`, {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({ action })
+    });
+    if (!resp.ok) {
+      const txt = await resp.text();
+      alert("Failed: " + txt);
+      return;
+    }
+    alert("Done: " + action);
+    // reload to update status
+    window.location.reload();
+  } catch (e) {
+    console.error(e);
+    alert("Error: " + e.message);
+  }
+}
+</script>
+
+</body>
+</html>
