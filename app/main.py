@@ -294,15 +294,16 @@ async def mailersend_inbound(request: Request, signature: str = Header(None, con
     """
     Endpoint to receive inbound emails forwarded by MailerSend inbound routing.
     MailerSend sends a JSON payload and sets a Signature header — validate it using
-    MAILERSEND_INBOUND_SECRET.
+    MAILERSEND_INBOUND_SECRET (optional for dev/testing).
     """
     raw_body = await request.body()
     secret = settings.MAILERSEND_INBOUND_SECRET
 
-    # verify signature — header name in MailerSend docs: "Signature"
-    sig_header = signature or request.headers.get("Signature") or request.headers.get("signature")
-    if not sig_header or not _verify_mailersend_signature(secret, raw_body, sig_header):
-        return {"ok": False, "error": "invalid signature"}, 400
+    # verify signature only if secret is configured
+    if secret:
+        sig_header = signature or request.headers.get("Signature") or request.headers.get("signature")
+        if not sig_header or not _verify_mailersend_signature(secret, raw_body, sig_header):
+            return {"ok": False, "error": "invalid signature"}, 400
 
     try:
         payload = await request.json()

@@ -5,8 +5,8 @@ load_dotenv()
 
 class Settings:
     APP_HOST = os.getenv("APP_HOST", "0.0.0.0")
-    APP_PORT = int(os.getenv("APP_PORT", 8080))
-    APP_BASE = os.getenv("APP_BASE", "http://localhost:8080")
+    APP_PORT = int(os.getenv("APP_PORT", 8081))
+    APP_BASE = os.getenv("APP_BASE", "http://localhost:8081")
     DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./data/iam.db")
 
     KEYCLOAK_SERVER_URL = os.getenv("KEYCLOAK_SERVER_URL")
@@ -26,6 +26,7 @@ class Settings:
     MAILERSEND_FROM_NAME = os.getenv("MAILERSEND_FROM_NAME", "IAM Automation")
     MAILERSEND_MAX_RETRIES = int(os.getenv("MAILERSEND_MAX_RETRIES", 3))
     MAILERSEND_RETRY_BACKOFF = float(os.getenv("MAILERSEND_RETRY_BACKOFF", 1.5))
+    MAILERSEND_INBOUND_SECRET = os.getenv("MAILERSEND_INBOUND_SECRET", "")  # Empty for dev/testing
 
     TOKEN_SECRET = os.getenv("TOKEN_SECRET", "change_me")
     TOKEN_EXPIRY_SECONDS = int(os.getenv("TOKEN_EXPIRY_SECONDS", 7*24*3600))

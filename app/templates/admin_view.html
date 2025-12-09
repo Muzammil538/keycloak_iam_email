@@ -28,7 +28,7 @@
           <dt class="font-medium">Request ID</dt><dd class="mb-3"><code class="text-xs text-gray-600">{{ req.id }}</code></dd>
           <dt class="font-medium">Requester</dt><dd class="mb-3">{{ req.requester_email or '—' }}</dd>
           <dt class="font-medium">Requested Role</dt><dd class="mb-3">{{ req.requested_role }}</dd>
-          <dt class="font-medium">Status</dt><dd class="mb-3">{{ req.status }}</dd>
+          <dt class="font-medium">Status</dt><dd class="mb-3">{{ req.status.value }}</dd>
           <dt class="font-medium">Created at</dt><dd class="mb-3">{{ req.created_at }}</dd>
         </dl>
 
@@ -37,7 +37,7 @@
             <button id="approveBtn" onclick="perform('approve')" class="w-full inline-flex justify-center items-center px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">✅ Approve</button>
             <button id="rejectBtn" onclick="perform('reject')" class="w-full mt-3 inline-flex justify-center items-center px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">❌ Reject</button>
           {% else %}
-            <div class="text-sm text-gray-600">This request is already <strong>{{ req.status }}</strong>.</div>
+            <div class="text-sm text-gray-600">This request is already <strong>{{ req.status.value }}</strong>.</div>
           {% endif %}
         </div>
       </div>
@@ -45,7 +45,7 @@
   </div>
 
 <script>
-const htmlContent = `{{ email_html | replace("\n", "\\n") | replace("`","\\`") }}`;
+const htmlContent = `{{ (email_html | replace("\n", "\\n") | replace("`","\\`")) | safe }}`;
 const frame = document.getElementById('emailFrame');
 frame.contentWindow.document.open();
 frame.contentWindow.document.write(htmlContent);

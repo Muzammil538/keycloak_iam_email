@@ -174,7 +174,7 @@ KEYCLOAK_CLIENT_SECRET=...
 MAILERSEND_API_KEY=...
 MAILERSEND_FROM_EMAIL=...
 MAILER_BACKEND=mailersend
-APP_BASE=http://localhost:8080
+APP_BASE=http://localhost:8081
 ```
 
 ---
@@ -234,13 +234,13 @@ MailerSend is now ready.
 Start the server:
 
 ```sh
-uvicorn app.main:app --host 0.0.0.0 --port 8080
+uvicorn app.main:app --host 0.0.0.0 --port 8081
 ```
 
 Check:
 
 ```
-http://localhost:8080/health
+http://localhost:8081/health
 ```
 
 ---
