@@ -13,6 +13,9 @@ class Settings:
     KEYCLOAK_REALM = os.getenv("KEYCLOAK_REALM", "master")
     KEYCLOAK_CLIENT_ID = os.getenv("KEYCLOAK_CLIENT_ID")
     KEYCLOAK_CLIENT_SECRET = os.getenv("KEYCLOAK_CLIENT_SECRET")
+    # Optional: Admin username/password (alternative to client credentials)
+    KEYCLOAK_ADMIN_USERNAME = os.getenv("KEYCLOAK_ADMIN_USERNAME")
+    KEYCLOAK_ADMIN_PASSWORD = os.getenv("KEYCLOAK_ADMIN_PASSWORD")
 
     MAILER_BACKEND = os.getenv("MAILER_BACKEND", "mailersend").lower()
 
