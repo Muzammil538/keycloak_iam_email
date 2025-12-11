@@ -344,6 +344,13 @@ Run all tests:
 pytest -q
 ```
 
+Command to Send Request email : 
+```
+curl -s -X POST http://127.0.0.1:8081/api/v1/requests \
+  -H "Content-Type: application/json" \
+  -d '{"keycloak_user_id":"madman","requester_email":"mad571869@gmail.com","requested_role":"project_access","metadata":{}}' | jq
+
+```
 This tests:
 
 * token creation

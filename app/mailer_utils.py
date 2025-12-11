@@ -4,6 +4,8 @@ import logging
 from .mailer_factory import get_mailer
 import os
 from jinja2 import Environment, FileSystemLoader, select_autoescape
+from .config import settings
+
 
 logger = logging.getLogger(__name__)
 
@@ -26,19 +28,20 @@ def _render_response_templates(ctx):
     text = env.get_template("response_email.txt").render(**ctx)
     return html, text
 
-def send_response_email(to_email: str, requested_role: str, status: str, request_id: str=None, approver_note: str=None):
-    """
-    Send a confirmation email to the requester notifying approve/reject.
-    Uses the configured mailer backend via get_mailer().
-    """
-    mailer = get_mailer()
-    subject = f"Your access request for {requested_role} has been {status}"
-    ctx = {"requested_role": requested_role, "status": status, "approver_note": approver_note}
-    html, text = _render_response_templates(ctx)
+
+
+def send_response_email(to_email, requested_role, status, request_id=None):
+    subject = f"Your access request was {status}"
+    text = f"Your request for role '{requested_role}' has been {status}."
+    html = f"<p>{text}</p>"
+
     try:
+        if settings.MAILER_BACKEND == "smtp":
+            from .mailers.smtp_adapter import send_email as mailer
+        else:
+            from .mailers.mailersend_adapter import send_email as mailer
         mailer(to_email, subject, html, text, request_id=request_id)
-        log_audit(request_id, actor="system", action=f"response_email_sent:{status}", meta=f"to={to_email}")
-        logger.info("Response email (%s) sent to %s", status, to_email)
+        from .mailer_utils import log_audit
+        log_audit(request_id=request_id, actor="system", action=f"response_email_{status}", meta=f"to={to_email}")
     except Exception as e:
         logger.exception("Failed to send response email to %s: %s", to_email, e)
-        log_audit(request_id, actor="system", action=f"response_email_failed:{status}", meta=str(e))

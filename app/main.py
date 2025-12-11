@@ -105,10 +105,8 @@ def callback(token: str = None, request: Request = None):
         if req.status != RequestStatus.pending:
             return HTMLResponse(f"<h3>Request already {req.status.value}</h3>")
 
-        # perform Keycloak operation, then mark token used
+        # Update status and log action (no Keycloak role assignment)
         if action == "approve":
-            kc = KeycloakClient()
-            kc.assign_realm_role(req.keycloak_user_id, req.requested_role)
             req.status = RequestStatus.approved
             log_audit(request_id, actor="approver", action="approved", ip=request.client.host if request.client else None, user_agent=request.headers.get("user-agent"))
             status_str = "approved"
@@ -118,8 +116,8 @@ def callback(token: str = None, request: Request = None):
             status_str = "rejected"
 
         db.commit()
+
         # mark token used after success
-        from .tokens import mark_token_used
         mark_token_used(jti)
 
         # Send confirmation email to requester
@@ -128,10 +126,13 @@ def callback(token: str = None, request: Request = None):
             if req.requester_email:
                 send_response_email(to_email=req.requester_email, requested_role=req.requested_role, status=status_str, request_id=req.id)
         except Exception:
-            # we already logged inside send_response_email; do not fail the callback
+            # don't fail the callback if email send fails; mailer_utils should log errors
             pass
 
         return HTMLResponse(f"<h3>Request {req.status.value}</h3>")
+    except HTTPException:
+        db.rollback()
+        raise
     except Exception as e:
         db.rollback()
         raise HTTPException(500, f"error processing request: {e}")
@@ -204,16 +205,10 @@ async def admin_action(request_id: str, payload: dict = None, request: Request =
         if action not in ("approve", "reject"):
             return HTMLResponse("invalid action", status_code=400)
 
-        # perform Keycloak action if approve
+        # Update status and log action (no Keycloak)
         if action == "approve":
-            try:
-                kc = KeycloakClient()
-                kc.assign_realm_role(req.keycloak_user_id, req.requested_role)
-                req.status = RequestStatus.approved
-                log_audit(req.id, actor="admin", action="approved", ip=request.client.host if request.client else None, user_agent=request.headers.get("user-agent"))
-            except Exception as e:
-                db.rollback()
-                return HTMLResponse(f"Keycloak error: {e}", status_code=500)
+            req.status = RequestStatus.approved
+            log_audit(req.id, actor="admin", action="approved", ip=request.client.host if request.client else None, user_agent=request.headers.get("user-agent"))
         else:
             req.status = RequestStatus.rejected
             log_audit(req.id, actor="admin", action="rejected", ip=request.client.host if request.client else None, user_agent=request.headers.get("user-agent"))

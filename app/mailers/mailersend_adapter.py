@@ -3,6 +3,10 @@ from typing import Optional
 from ..config import settings
 from ..mailer_utils import log_audit
 
+import re
+
+EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
+
 logger = logging.getLogger(__name__)
 MAILERSEND_API_URL = "https://api.mailersend.com/v1/email"
 MAILERSEND_API_KEY = settings.MAILERSEND_API_KEY
@@ -22,6 +26,9 @@ def _build_payload(to_email: str, subject: str, html_body: str, text_body: str):
         "html": html_body,
         "text": text_body
     }
+    
+def _ensure_valid_email(email: str) -> bool:
+    return bool(email and EMAIL_RE.match(email))
 
 def send_email(to_email: str, subject: str, html_body: str, text_body: str, request_id: Optional[str] = None) -> bool:
     if not MAILERSEND_API_KEY:
